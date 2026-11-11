@@ -1,0 +1,1 @@
+<template><section class="site-container section-space"><h1>Página indisponível</h1><p>Este conteúdo não está disponível no portal.</p><RouterLink class="btn button-dark" to="/">Voltar para a Home</RouterLink></section></template>
