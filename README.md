@@ -143,9 +143,9 @@ Os itens acima estão priorizados no [backlog](docs/05-backlog.md).
 |---|---|
 | _Emilly da Silva da Luz_ | _desenvolvimento frontend e backend_ |
 | _Pedro Henrique de Souza_ | _documentação_ |
-| _Dalton Marcelino _ | _UX e pitch_ |
-| _Dalton Marcelino _ | _UX e pitch_ |
-| _Dalton Marcelino _ | _UX e pitch_ |
+| _Dalton Marcelino_ | _UX e pitch_ |
+| _Alexandre Fragoso_ | _UX e pitch_ |
+| _Kauã Salvalagio_ | _UX e pitch_ |
 
 ## Licença e autoria
 
