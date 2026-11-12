@@ -150,9 +150,11 @@ Os itens acima estão priorizados no [backlog](docs/05-backlog.md).
 
 | Integrante | Papel |
 |---|---|
-| _Nome_ | _Ex.: desenvolvimento frontend_ |
-| _Nome_ | _Ex.: curadoria de dados e documentação_ |
-| _Nome_ | _Ex.: UX e pitch_ |
+| _Emilly da Silva da Luz_ | _desenvolvimento frontend e backend_ |
+| _Pedro Henrique de Souza_ | _documentação_ |
+| _Dalton Marcelino _ | _UX e pitch_ |
+| _Dalton Marcelino _ | _UX e pitch_ |
+| _Dalton Marcelino _ | _UX e pitch_ |
 
 ## Licença e autoria
 
