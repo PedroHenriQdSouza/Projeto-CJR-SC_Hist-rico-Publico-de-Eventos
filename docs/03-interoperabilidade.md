@@ -33,7 +33,7 @@ flowchart LR
 | Resultados e classificação | **Domínio competitivo** | Recebe o resultado **homologado**; nunca recalcula |
 | Tema, textos, notícias, marcos históricos | **Histórico Público** | Cria, valida e publica |
 | Fontes, créditos e autorização de imagem | **Histórico Público** | Registra e exibe |
-| Decisão de publicar | **Histórico Público** (validador) | Nada é publicado automaticamente |
+| Decisão de publicar | **Histórico Público** (administrador master) | Nada é publicado automaticamente |
 
 **Regra de ouro:** o Histórico Público **não corrige** dados de outro domínio. Se encontrar um erro num resultado, devolve à origem. Depois da correção lá, o dado é reimportado e passa de novo pela validação.
 
@@ -87,5 +87,5 @@ Os dados importados entram como **Rascunho**, com `sources` preenchido automatic
 | Dependência | Risco | Mitigação |
 |---|---|---|
 | Resultado homologado do Desafio 02 | Atraso ou correção depois da publicação | Publicar com data de homologação; correções geram nova revisão |
-| Totais do Desafio 01 | Divergência entre fontes (250+ × 312) | Sempre exibir a fonte; o curador escolhe a oficial |
+| Totais do Desafio 01 | Divergência entre fontes (250+ × 312) | Sempre exibir a fonte; o administrador master escolhe a oficial |
 | Autorização de imagem (Secretaria/escolas) | Publicar rosto de menor sem termo | Usar só imagens ilustrativas ou autorizadas; ver [04](04-editorial-privacidade.md) |

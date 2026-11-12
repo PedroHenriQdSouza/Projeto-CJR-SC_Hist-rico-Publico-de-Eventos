@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useCatalog } from '../stores/catalog'
-import { cover, safeImage, safeLink } from '../services/content'
+import { cover, displayCover, safeLink } from '../services/content'
 import type { Collection, RecordEntry } from '../types/content'
 import Gallery from './Gallery.vue'
 import ContentCard from './ContentCard.vue'
 import BlockRenderer from './BlockRenderer.vue'
 const props = defineProps<{ item: RecordEntry; section: Collection; preview?: boolean }>()
 const catalog = useCatalog()
+const photo = computed(() => displayCover(props.item, props.section))
 const relations = computed(() => {
   const { item, section, preview } = props
   const entries = (key: Collection) => preview ? catalog.data[key] : catalog.published(key)
@@ -27,7 +28,7 @@ const facts = computed(() => [
 <template>
   <article class="entry-content">
     <header class="mb-4"><div class="card-meta mb-2"><span v-if="item.year">{{ item.year }}</span><time v-if="item.date" :datetime="item.date">{{ item.date.split('-').reverse().join('/') }}</time><span v-if="item.demo">Demonstração</span></div><h1>{{ item.title || 'Sem título' }}</h1><p v-if="item.subtitle" class="lead">{{ item.subtitle }}</p></header>
-    <figure v-if="cover(item) && safeImage(cover(item)!.src)" class="entry-cover"><img :src="safeImage(cover(item)!.src)" :alt="cover(item)!.alt"><figcaption v-if="cover(item)!.caption">{{ cover(item)!.caption }}</figcaption></figure>
+    <figure v-if="photo" class="entry-cover"><img :src="photo.src" :alt="photo.alt"><figcaption v-if="photo.caption">{{ photo.caption }}</figcaption></figure>
     <p v-if="item.description" class="lead preserved">{{ item.description }}</p>
     <dl v-if="facts.length" class="facts"><div v-for="[name, value] in facts" :key="name!"><dt>{{ name }}</dt><dd>{{ value }}</dd></div></dl>
     <section v-if="item.context"><h2>Contextualização</h2><p class="preserved">{{ item.context }}</p></section>

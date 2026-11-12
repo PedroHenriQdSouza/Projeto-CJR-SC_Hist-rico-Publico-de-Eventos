@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import ContentCard from '../components/ContentCard.vue'
+import Timeline from '../components/Timeline.vue'
 import { useCatalog } from '../stores/catalog'
 import type { Collection } from '../types/content'
 const props = defineProps<{ section: Collection }>()
@@ -14,10 +15,16 @@ const filtered = computed(() => entries.value.filter(item => !filter.value || St
 </script>
 
 <template>
-  <header class="page-heading"><div class="site-container"><RouterLink to="/">Home</RouterLink><h1>{{ titles[section] }}</h1></div></header>
+  <header class="page-heading"><div class="site-container">
+    <RouterLink to="/">Home</RouterLink><h1>{{ titles[section] }}</h1>
+  </div></header>
   <section class="site-container section-space">
     <label v-if="section === 'editais' && years.length" class="filter">Ano<select v-model="filter" class="form-select"><option value="">Todos os anos</option><option v-for="year in years" :key="year!" :value="String(year)">{{ year }}</option></select></label>
     <div v-if="filtered.length" class="card-grid"><ContentCard v-for="item in filtered" :key="item.id" :item="item" :section="section" /></div>
     <p v-else>Ainda não há registros publicados para esta consulta.</p>
+    <details v-if="section === 'edicoes'" id="marcos-historicos" class="mt-5" :open="$route.hash === '#marcos-historicos'">
+      <summary class="fw-semibold">Marcos históricos do CJR</summary>
+      <Timeline />
+    </details>
   </section>
 </template>

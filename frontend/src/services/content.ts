@@ -1,4 +1,4 @@
-import type { Block, BlockType, Line, RecordEntry } from '../types/content'
+import type { Block, BlockType, Line, Media, RecordEntry } from '../types/content'
 
 export const uid = () => crypto.randomUUID()
 export const slugify = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -25,6 +25,23 @@ export function safeImage(input: string) {
 
 export function cover(entry: RecordEntry) {
   return entry.images.find(item => item.id === entry.coverId) ?? entry.images[0]
+}
+
+const coverIllustrations = [
+  ['robo-lego.webp', 'Robô Lego sobre uma pista'],
+  ['prototipo-competicao.webp', 'Protótipo de competição sobre o piso verde'],
+  ['arena-cjr.webp', 'Robôs em uma arena de testes'],
+  ['robo-na-arena.webp', 'Robô bípede em uma arena'],
+] as const
+
+export function displayCover(entry: RecordEntry, section: string): (Media & { illustrative?: boolean }) | undefined {
+  const selected = cover(entry)
+  const src = safeImage(selected?.src ?? '')
+  if (selected && src) return { ...selected, src }
+  if (!['edicoes', 'temas', 'categorias'].includes(section)) return undefined
+  const variation = entry.year ?? Array.from(entry.slug, letter => letter.charCodeAt(0)).reduce((sum, code) => sum + code, 0)
+  const [file, alt] = coverIllustrations[variation % coverIllustrations.length] ?? coverIllustrations[0]
+  return { id: file, src: '/images/' + file, alt, caption: 'Foto ilustrativa de robótica.', illustrative: true }
 }
 
 export function template(number: number) {

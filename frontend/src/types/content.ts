@@ -9,6 +9,7 @@ export interface Line { id: string; text: string; bold: boolean; italic: boolean
 export interface Block { id: string; type: BlockType; order: number; title: string; subtitle: string; style: 'paragraph' | 'bullets' | 'numbered'; lines: Line[]; images: Media[]; href: string; fromGallery: boolean }
 export interface Revision { date: string; status: Status }
 export interface RecordEntry {
+  authorId?: string
   id: string; slug: string; title: string; subtitle: string; description: string; objective: string; context: string; features: string
   year: number | null; date: string; period: string; place: string; teams: number | null; schools: number | null; students: number | null
   results: string; sources: string; credits: string; url: string; themeId: string; editionId: string; categoryIds: string[]

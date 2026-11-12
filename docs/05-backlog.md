@@ -17,7 +17,7 @@ Prioridade: **P1** = próximo passo; **P2** = antes de uso real; **P3** = evolu�
 | # | Item | Critério de aceite |
 |---|---|---|
 | 6 | **API real + banco de dados** (NestJS + PostgreSQL) | Os endpoints de `/api/acervo` e `/api/editorial` fazem CRUD; `storage.ts` passa a usar HTTP |
-| 7 | **Autenticação e perfis** (editor, validador, administrador) | Quem envia não aprova o próprio conteúdo; sessão com expiração |
+| 7 | **Autenticação real no servidor** para os perfis que já existem (Colaborador e Administrador master) | Login validado pela API, senha com hash, sessão com expiração e registro de quem aprovou cada publicação |
 | 8 | **Armazenamento de imagens** fora do banco | Upload para um serviço de arquivos; o banco guarda só a URL |
 | 9 | **Importação dos Desafios 01 e 02** | Edição encerrada e resultado homologado entram como Rascunho com a fonte preenchida |
 | 10 | **Testes automatizados** (Vitest para regras da store; Playwright para o fluxo editorial) | CI roda os testes a cada push |

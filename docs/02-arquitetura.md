@@ -9,10 +9,14 @@ flowchart TB
             P[Portal público<br/>PublicLayout]
             A[Painel de curadoria<br/>AdminLayout]
             S[(Store Pinia<br/>catalog.ts<br/>regras + status)]
+            AU[(Store Pinia<br/>auth.ts<br/>perfis + sessão)]
             ST[services/storage.ts]
             P -->|somente publicados| S
+            A -->|login| AU
             A -->|put / remove| S
+            S -->|verifica permissão| AU
             S --> ST
+            AU --> ST
         end
         LS[(localStorage<br/>chaves cjr_*)]
         ST --> LS
@@ -34,21 +38,24 @@ flowchart TB
 | **SPA em Vue 3 + TypeScript** | Equipe já domina; tipagem forte no modelo de dados | `vue-tsc` checa os tipos no build |
 | **Persistência em `localStorage`** | MVP demonstrável sem servidor e sem dados reais | Dados ficam por navegador; a camada `storage.ts` isola a troca por API |
 | **Uma store central (`catalog.ts`)** | Regras de negócio e status num só lugar | O portal e o painel nunca divergem nas regras |
+| **Perfis na store `auth.ts`** | Colaborador e Administrador master com permissões diferentes | `catalog.put()` e `remove()` recusam ações fora do perfil, mesmo que a tela seja contornada |
 | **Portal lê só `status === 'published'`** | Garante que nada não validado vaze | `catalog.published(colecao)` é a única porta do público |
 | **Acervo real separado dos exemplos** | `archive.ts` (fontes reais) × `seed.ts` (fictício, `demo: true`) | Exemplos aparecem com selo "Demonstração" |
-| **Migração versionada do acervo** | Flags `acervo_slides_2026` e `exemplos_portal_2030` | Atualiza o acervo sem apagar o que o curador editou |
+| **Migração versionada do acervo** | Flags `acervo_slides_2026` e `exemplos_portal_2030` | Atualiza o acervo sem apagar o que a equipe editou |
 | **Backend NestJS descritivo** | Define desde já o contrato e os módulos (`acervo`, `editorial`) | Pronto para virar a API real sem reescrever o frontend |
 | **Imagens redimensionadas no cliente** | Cabem no `localStorage` (máx. 1200 px, WebP) | Uploads de até 10 MB viram cerca de 300 KB |
+| **Foto ilustrativa automática** | Edições, temas e categorias sem imagem ficariam sem capa | `displayCover()` escolhe uma foto de robótica e marca o card com "Foto ilustrativa" |
 
 ## Módulos do frontend
 
 | Pasta | Responsabilidade |
 |---|---|
-| `layouts/` | `PublicLayout` (header, skip-link, footer) e `AdminLayout` (sessão simulada e menu lateral) |
-| `views/` | `Home`, `PublicCollection`, `PublicDetail`, `Participate`, `Dashboard`, `AdminList`, `Editor` |
-| `components/` | `Timeline`, `EntryContent` (página de detalhe), `EntryFields` (formulário por coleção), `BlockRenderer`/`BlockSettings` (editor em blocos), `MediaEditor`, `Gallery` |
-| `stores/catalog.ts` | Carga e migração, `published()`, `put()` com validações e histórico, `remove()` com checagem de vínculos, sincronização entre abas |
-| `services/` | `archive.ts` (acervo com fontes), `seed.ts` (exemplos), `content.ts` (fábricas, `slugify`, `safeLink`/`safeImage`), `images.ts`, `storage.ts` |
+| `layouts/` | `PublicLayout` (header, skip-link, footer com localização e acesso ao painel) e `AdminLayout` (login com contas de teste, menu lateral por perfil e bloqueio "Acesso restrito") |
+| `views/` | `Home`, `PublicCollection` (inclui os marcos históricos em Edições), `PublicDetail`, `Participate`, `Dashboard`, `AdminList`, `Editor`, `AdminUsers` |
+| `components/` | `Hero`, `StudentJourney` (jornada do estudante em 4 etapas), `PartnerCarousel` (vitrine de parceiros com pausa), `Timeline` (marcos de 2017 a 2026), `EntryContent` (página de detalhe), `EntryFields` (formulário por coleção), `BlockRenderer`/`BlockSettings` (editor em blocos), `MediaEditor`, `Gallery` |
+| `stores/catalog.ts` | Carga e migração, `published()`, `put()` com validações, permissões e histórico, `remove()` com checagem de vínculos, sincronização entre abas |
+| `stores/auth.ts` | Contas de demonstração, `signIn()`/`signOut()`, perfil atual e `addAccount()` (só o master) |
+| `services/` | `archive.ts` (acervo com fontes), `seed.ts` (exemplos), `content.ts` (fábricas, `slugify`, `safeLink`/`safeImage`, `displayCover`), `images.ts`, `storage.ts` |
 | `types/content.ts` | Coleções, status, tipos de bloco e entidade `RecordEntry` |
 
 ## Rotas
@@ -56,13 +63,14 @@ flowchart TB
 | Rota | Tela |
 |---|---|
 | `/` | Home |
-| `/edicoes`, `/temas`, `/categorias`, `/noticias`, `/editais` | Coleção pública |
+| `/edicoes`, `/temas`, `/categorias`, `/noticias`, `/editais` | Coleção pública (`/edicoes#marcos-historicos` abre os marcos) |
 | `/<colecao>/:slug` | Detalhe (edição usa o ano como slug: `/edicoes/2026`) |
 | `/faca-parte` | Orientações para escolas e parceiros |
-| `/admin` | Dashboard (exige sessão simulada) |
-| `/admin/:section` | Lista da coleção |
-| `/admin/:section/:id` · `/admin/:section/novo` | Editor |
-| `/admin/nova-publicacao` | Assistente de nova notícia ou tema |
+| `/admin` | Login e dashboard (colaborador e master) |
+| `/admin/noticias` · `/admin/noticias/:id` | Minhas matérias / publicações e editor (colaborador e master) |
+| `/admin/nova-publicacao` | Assistente de nova notícia (o master também cria temas) |
+| `/admin/:section` · `/admin/:section/:id` · `/admin/:section/novo` | Lista e editor das demais coleções (só master) |
+| `/admin/usuarios` | Cadastro de usuários de demonstração (só master) |
 
 ## Modelo de dados
 
@@ -92,7 +100,7 @@ erDiagram
 | Vínculos | `themeId`, `editionId`, `categoryIds[]` | Exclusão bloqueada se houver vínculo |
 | Procedência | `sources`, `credits`, `demo` | Exibidos em "Fontes e créditos" e no selo "Demonstração" |
 | Mídia | `images[]` (`src`, `alt`, `caption`), `coverId`, `url` | `alt` é editável; `url` passa por `safeLink` |
-| Editorial | `status`, `createdAt`, `updatedAt`, `revisions[]` | `status ∈ {draft, pending, published}` |
+| Editorial | `status`, `authorId`, `createdAt`, `updatedAt`, `revisions[]` | `status ∈ {draft, pending, published}`; `authorId` guarda quem criou o registro |
 
 ### Status
 
@@ -104,11 +112,14 @@ erDiagram
 
 ### Regras aplicadas em `catalog.put()`
 
+- Permissão: o colaborador só salva notícias próprias, como rascunho ou pendente, e não altera matérias já publicadas; o master pode tudo
 - Título obrigatório
 - Edição: ano válido (1900–9999) e único; para publicar, precisa de tema
 - Edital: para publicar, precisa de URL válida
 - Conflito: se `updatedAt` mudou em outra aba, o salvamento é recusado
 - Cada salvamento acrescenta `{ date, status }` ao histórico (mantém os 20 últimos)
+
+`catalog.remove()` só aceita o administrador master e recusa registros com vínculos.
 
 ## API demonstrativa (backend)
 

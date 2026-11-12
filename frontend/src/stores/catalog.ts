@@ -5,6 +5,7 @@ import { safeLink, slugify } from '../services/content'
 import { archive, archiveStamp } from '../services/archive'
 import { demonstrations, seed } from '../services/seed'
 import { storage } from '../services/storage'
+import { useAuth } from './auth'
 
 type Catalog = Record<Collection, RecordEntry[]>
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
@@ -12,7 +13,7 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 export const useCatalog = defineStore('catalog', () => {
   const error = ref('')
   const data = reactive<Catalog>(Object.fromEntries(collections.map(key => [key, []])) as unknown as Catalog)
-  const session = ref(false)
+  const auth = useAuth()
 
   for (const key of collections) {
     try {
@@ -83,28 +84,56 @@ export const useCatalog = defineStore('catalog', () => {
       error.value = 'Os exemplos fictícios não puderam ser carregados por completo. Verifique o armazenamento do navegador.'
     }
   }
-  try { session.value = storage.read<boolean>('admin_session', false) === true } catch { error.value = 'A sessão local não pôde ser carregada.' }
-
   function reload(event: StorageEvent) {
     const collection = collections.find(key => event.key === 'cjr_' + key)
     try {
       if (collection) data[collection] = storage.read(collection, clone(seed[collection]))
-      if (event.key === 'cjr_admin_session') session.value = storage.read('admin_session', false)
       if (event.key === null) window.location.reload()
     } catch { error.value = 'Não foi possível sincronizar os dados locais entre abas.' }
   }
+  if (!error.value) {
+    const example = demonstrations.parceiros[0]
+    const legacyPartner = data.parceiros.find(item => item.id === example.id && item.demo && item.title === 'Laboratório Oficina Modelo'
+      && !item.images.length && !item.revisions.length)
+    if (legacyPartner) {
+      const next = data.parceiros.map(item => item === legacyPartner ? {
+        ...item, title: example.title, description: example.description, sources: example.sources, images: example.images,
+      } : item)
+      try {
+        storage.write('parceiros', next)
+        data.parceiros = next
+      } catch {
+        error.value = 'A logo de demonstração não pôde ser adicionada ao armazenamento local.'
+      }
+    }
+  }
+  if (!error.value) {
+    try {
+      for (const key of ['editais', 'categorias'] as const) {
+        const example = demonstrations[key][0]
+        const existing = data[key].find(item => item.id === example.id && item.demo && !item.images.length && !item.revisions.length)
+        if (!existing) continue
+        const next = data[key].map(item => item === existing ? { ...item, images: example.images } : item)
+        storage.write(key, next)
+        data[key] = next
+      }
+    } catch {
+      error.value = 'As imagens de demonstração não puderam ser adicionadas ao armazenamento local.'
+    }
+  }
   window.addEventListener('storage', reload)
 
-  function setSession(value: boolean) {
-    storage.write('admin_session', value)
-    session.value = value
-  }
   function published(key: Collection) {
     return data[key].filter(item => item.status === 'published')
   }
   function put(key: Collection, entry: RecordEntry, status: Status, editionIds?: string[]) {
     const current = storage.read(key, data[key])
     const previous = current.find(item => item.id === entry.id)
+    const actor = auth.user
+    if (!actor || (!auth.isMaster && (key !== 'noticias' || status === 'published'
+      || (previous && (previous.authorId !== actor.id || previous.status === 'published'))))) {
+      throw new Error('Seu perfil não tem permissão para salvar essa alteração.')
+    }
     if (entry.updatedAt && previous?.updatedAt !== entry.updatedAt) throw new Error('O registro mudou em outra aba. Reabra a edição antes de salvar.')
     if (!entry.title.trim()) throw new Error('Informe o título.')
     if (key === 'edicoes' && (!entry.year || !Number.isInteger(entry.year) || entry.year < 1900 || entry.year > 9999)) throw new Error('Informe um ano válido.')
@@ -116,7 +145,7 @@ export const useCatalog = defineStore('catalog', () => {
     if (current.some(item => item.id !== entry.id && item.slug === slug)) slug = base + '-' + entry.id.slice(0, 8)
     const date = new Date().toISOString()
     const record = clone({
-      ...entry, title: entry.title.trim(), slug, status, createdAt: previous?.createdAt || date, updatedAt: date,
+      ...entry, authorId: previous ? previous.authorId : actor.id, title: entry.title.trim(), slug, status, createdAt: previous?.createdAt || date, updatedAt: date,
       revisions: [...(previous?.revisions ?? []), { date, status }].slice(-20),
       blocks: entry.blocks.map((block, order) => ({ ...block, order })),
     })
@@ -138,6 +167,7 @@ export const useCatalog = defineStore('catalog', () => {
     return clone(record)
   }
   function remove(key: Collection, id: string) {
+    if (!auth.isMaster) throw new Error('Apenas o administrador master pode excluir registros.')
     const linked = (key === 'temas' && data.edicoes.some(item => item.themeId === id))
       || (key === 'edicoes' && [...data.noticias, ...data.marcos_historicos].some(item => item.editionId === id))
       || (key === 'categorias' && [...data.temas, ...data.edicoes].some(item => item.categoryIds.includes(id)))
@@ -146,5 +176,5 @@ export const useCatalog = defineStore('catalog', () => {
     storage.write(key, next)
     data[key] = next
   }
-  return { data, error, session, setSession, published, put, remove }
+  return { data, error, published, put, remove }
 })

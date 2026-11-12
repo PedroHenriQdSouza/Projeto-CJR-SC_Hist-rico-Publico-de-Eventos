@@ -2,31 +2,38 @@
 
 ## Critérios editoriais
 
-Antes de **Aprovar e publicar**, o validador confere:
+Antes de **Aprovar e publicar**, o administrador master confere:
 
 | # | Critério | Como verificar no sistema |
 |---|---|---|
 | 1 | **Fonte informada** e rastreável | Campo "Fontes e referências" preenchido (ex.: "Apresentação CJR 2026 · slide 13") |
 | 2 | **Dado confere com a fonte oficial** | Edições e totais: gestão operacional; resultados: domínio competitivo |
 | 3 | **Sem dados pessoais de menores** | Nada de nome, foto identificável, turma ou contato de estudante |
-| 4 | **Imagem autorizada ou ilustrativa** | Legenda indica a origem ("Imagem ilustrativa gerada por IA", "Apresentação CJR, slide 16") |
+| 4 | **Imagem autorizada ou ilustrativa** | Legenda indica a origem ("Imagem ilustrativa gerada por IA", "Foto ilustrativa de robótica", "Apresentação CJR, slide 16") |
 | 5 | **Texto alternativo** em toda imagem | Campo "Texto alternativo" no editor de mídia |
 | 6 | **Conteúdo fictício identificado** | Opção "Identificar como demonstração" marcada |
+
+## Perfis
+
+| Perfil | Pode | Não pode |
+|---|---|---|
+| **Colaborador** | Criar notícias, salvar rascunho, enviar para revisão, ver as próprias matérias | Publicar, editar matéria já publicada, excluir, acessar edições, temas, categorias, editais, parceiros, marcos e usuários |
+| **Administrador master** | Tudo: revisar e aprovar, publicar diretamente, atualizar, retirar do ar, excluir e cadastrar usuários | — |
 
 ## Ciclo de vida do conteúdo
 
 ```mermaid
 stateDiagram-v2
     [*] --> Rascunho: criar
-    Rascunho --> Pendente: Enviar para validação
-    Pendente --> Publicado: Aprovar e publicar (confirmação)
-    Rascunho --> Publicado: Publicar (confirmação)
-    Publicado --> Publicado: Atualizar publicação (nova revisão)
-    Publicado --> Rascunho: Retirar do ar (confirmação)
+    Rascunho --> Pendente: Enviar para revisão (colaborador ou master)
+    Pendente --> Publicado: Aprovar e publicar (master, com confirmação)
+    Rascunho --> Publicado: Publicar (master, com confirmação)
+    Publicado --> Publicado: Atualizar publicação (master, nova revisão)
+    Publicado --> Rascunho: Retirar do ar (master, com confirmação)
     Pendente --> Rascunho: Salvar rascunho
 ```
 
-- **Só `Publicado` aparece no portal.** O dashboard mostra quantas publicações aguardam validação.
+- **Só `Publicado` aparece no portal.** O dashboard do master mostra quantas publicações aguardam validação e tem atalhos para as pendentes e as publicadas.
 - **Toda transição gera uma revisão** (data e status), visível em "Histórico de alterações".
 - **Retirar do ar** é a forma recomendada de tirar um conteúdo do portal sem perder o registro.
 
@@ -34,7 +41,7 @@ stateDiagram-v2
 
 Responde à pergunta do discovery *"Como corrigir conteúdo já publicado e preservar sua procedência?"*:
 
-1. O curador abre o registro publicado e corrige.
+1. O administrador master abre o registro publicado e corrige.
 2. Atualiza o campo **Fontes** com a nova referência (ex.: "Corrigido conforme ofício nº X, de 12/11/2026").
 3. Clica em **Atualizar publicação**; o histórico registra a data.
 4. Se a correção vier de outro domínio (ex.: resultado), o dado é corrigido **na origem** e reimportado.
@@ -60,16 +67,20 @@ Responde à pergunta do discovery *"Como corrigir conteúdo já publicado e pres
 | Nenhum HTML vindo do usuário é interpretado (sem `v-html`) | Todos os componentes |
 | Upload limitado (JPG/PNG/WebP, até 10 MB, redimensionado) | `services/images.ts` |
 | Conflito de edição entre abas detectado | `catalog.put()` compara `updatedAt` |
-| Exclusão bloqueada quando há vínculos | `catalog.remove()` |
-| **Autenticação: simulada** | `AdminLayout`. Produção exige login real e perfis (editor × validador) |
+| Permissões por perfil verificadas na regra de negócio, não só na tela | `catalog.put()` e `catalog.remove()` consultam `stores/auth.ts` |
+| Seções exclusivas do master bloqueadas por rota | `AdminLayout` mostra "Acesso restrito" |
+| Exclusão só pelo master e bloqueada quando há vínculos | `catalog.remove()` |
+| **Autenticação: simulada** | Contas e códigos de demonstração no `localStorage`, sem criptografia. Produção exige login no servidor (backlog, item 7) |
 
 ## Acessibilidade
 
 - `lang="pt-BR"` e `meta description`
 - Link "Pular para o conteúdo" no portal
 - Foco visível (`:focus-visible`) em todos os elementos interativos
-- `aria-label` em botões só com ícone; `aria-expanded` e `aria-controls` no menu móvel; `aria-pressed` em botões de alternância
+- `aria-label` em botões só com ícone; `aria-expanded` e `aria-controls` nos menus móveis do portal e do painel; `aria-pressed` em botões de alternância
+- Carrossel de parceiros com botão "Pausar movimento", pausa ao passar o mouse ou focar, e sem movimento automático com `prefers-reduced-motion`
+- No editor em telas pequenas, o foco vai para o painel de configurações do bloco selecionado
 - Mensagens com `role="status"` (sucesso) e `role="alert"` (erro)
 - Texto alternativo editável em todas as imagens
 - `prefers-reduced-motion` respeitado
-- Estrutura semântica: `header`, `nav`, `main`, `article`, `figure`/`figcaption`, `dl` para fatos e `ol` na linha do tempo
+- Estrutura semântica: `header`, `nav`, `main`, `article`, `figure`/`figcaption`, `dl` para fatos e `ol` na jornada do estudante e nos marcos históricos

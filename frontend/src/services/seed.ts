@@ -10,6 +10,8 @@ const entry = (id: string, slug: string, title: string, fields: Partial<RecordEn
 const story = newBlock('text')
 story.lines[0].text = 'Neste exemplo de publicação, a turma começa com um esboço, monta o protótipo e testa o percurso. A cada rodada, registra o que funcionou e o que precisa ser ajustado.'
 const example = 'Dados fictícios criados para demonstrar o portal.'
+const arenaPhoto: Media = { id: 'robo-na-arena', src: '/images/robo-na-arena.webp', alt: 'Robô bípede sobre o piso verde de uma arena', caption: 'Foto ilustrativa fornecida para o portal.' }
+const prototypePhoto: Media = { id: 'prototipo-competicao', src: '/images/prototipo-competicao.webp', alt: 'Protótipo de competição preto e metálico sobre o piso verde', caption: 'Foto ilustrativa fornecida para o portal.' }
 const demoEdition = 'demo-edicao-2030'
 const demoTheme = 'demo-tema-2030'
 const demoCategory = 'demo-categoria-2030'
@@ -18,7 +20,7 @@ export const demonstrations = {
   categorias: [entry(demoCategory, 'resgate-de-prototipos', 'Resgate de Protótipos', {
     description: 'Modalidade fictícia em que robôs localizam e transportam peças leves até uma zona segura.',
     features: 'No cenário de demonstração, cada equipe tem três minutos para completar o percurso.',
-    sources: example,
+    sources: example, images: [prototypePhoto],
   })],
   temas: [entry(demoTheme, 'bairros-do-futuro', 'Bairros do Futuro', {
     year: 2030, categoryIds: [demoCategory], description: 'Tema fictício sobre como a robótica poderia ajudar a melhorar a vida no bairro.',
@@ -38,10 +40,11 @@ export const demonstrations = {
   editais: [entry(demoNoticeId, 'edital-demonstrativo-2030', 'Edital demonstrativo 01/2030 · Inscrição de equipes', {
     year: 2030, date: '2030-08-01', editionId: demoEdition,
     description: 'Exemplo fictício de edital com público-alvo, etapas e calendário de inscrição. Nenhuma inscrição está aberta por este documento.',
-    url: '/documentos/edital-demonstrativo-2030.pdf', sources: example,
+    url: '/documentos/edital-demonstrativo-2030.pdf', sources: example, images: [arenaPhoto],
   })],
-  parceiros: [entry('demo-parceiro-2030', 'laboratorio-oficina-modelo', 'Laboratório Oficina Modelo', {
-    description: 'Organização fictícia que, neste exemplo, emprestaria kits e apoiaria as oficinas de preparação.', sources: example,
+  parceiros: [entry('demo-parceiro-2030', 'axologic', 'Axologic', {
+    description: 'Logo de exemplo para demonstrar a vitrine de parceiros.', sources: 'Imagem fornecida para a demonstração.',
+    images: [{ id: 'demo-logo-axologic', src: '/images/axologic.png', alt: 'Logo da Axologic', caption: 'Demonstração' }],
   })],
   marcos_historicos: [entry('demo-marco-2030', 'mostra-demonstrativa', 'Mostra demonstrativa de protótipos', {
     year: 2030, editionId: demoEdition,

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import { useCatalog } from '../stores/catalog'
+import { useAuth } from '../stores/auth'
 import { adminLabels } from '../services/admin'
 import { newBlock, newEntry, template } from '../services/content'
 import { blockTypes, collections, statuses, type BlockType, type RecordEntry, type Status } from '../types/content'
@@ -14,9 +15,11 @@ import ConfirmDialog from '../components/ConfirmDialog.vue'
 const props = defineProps<{ section: string; id?: string; choose?: boolean }>()
 const router = useRouter()
 const catalog = useCatalog()
+const auth = useAuth()
 const section = ref(collections.find(item => item === props.section))
 const saved = props.id && props.id !== 'novo' && section.value ? catalog.data[section.value].find(item => item.id === props.id) : undefined
 const missing = !section.value || Boolean(props.id && props.id !== 'novo' && !saved)
+  || Boolean(saved && !auth.isMaster && (saved.authorId !== auth.user?.id || saved.status === 'published'))
 const entry = ref<RecordEntry>(saved ? JSON.parse(JSON.stringify(saved)) : newEntry())
 const editions = ref(catalog.data.edicoes.filter(item => item.themeId === entry.value.id).map(item => item.id))
 const baseline = ref(JSON.stringify([entry.value, editions.value]))
@@ -25,6 +28,7 @@ const model = ref(1)
 const editing = computed(() => section.value === 'noticias' || section.value === 'temas')
 const preview = ref(false)
 const panel = ref<'entry' | 'block'>('entry')
+const settings = ref<HTMLElement>()
 const active = ref('')
 const blockType = ref<BlockType>('text')
 const current = computed(() => entry.value.blocks.find(item => item.id === active.value))
@@ -42,6 +46,9 @@ function start() {
 function select(id: string) {
   active.value = id
   panel.value = 'block'
+  if (window.matchMedia('(max-width: 950px)').matches) {
+    void nextTick(() => settings.value?.focus())
+  }
 }
 function add() {
   const block = newBlock(blockType.value)
@@ -74,7 +81,7 @@ function save(status: Status) {
     }
     entry.value = catalog.put(section.value, normalized, status, editions.value)
     baseline.value = JSON.stringify([entry.value, editions.value])
-    feedback.value = status === 'published' ? 'Conteúdo publicado neste navegador.' : status === 'pending' ? 'Conteúdo enviado para validação simulada.' : 'Rascunho salvo.'
+    feedback.value = status === 'published' ? 'Conteúdo publicado neste navegador.' : status === 'pending' ? 'Matéria enviada para revisão do administrador master.' : 'Rascunho salvo.'
     if (firstSave) {
       void router.replace({
         path: '/admin/' + section.value + '/' + entry.value.id,
@@ -91,7 +98,7 @@ function ask(status: Status) {
 }
 function viewPublic() {
   if (!section.value) return
-  const to = section.value === 'parceiros' ? '/' : section.value === 'marcos_historicos' ? '/#linha-do-tempo' : '/' + section.value + '/' + entry.value.slug
+  const to = section.value === 'parceiros' ? '/' : section.value === 'marcos_historicos' ? '/edicoes#marcos-historicos' : '/' + section.value + '/' + entry.value.slug
   void router.push(to)
 }
 </script>
@@ -101,7 +108,8 @@ function viewPublic() {
   <section v-else-if="!ready" class="admin-panel setup">
     <h1>Nova Publicação</h1><p>Escolha o tipo de conteúdo e a estrutura inicial dos blocos.</p>
     <form @submit.prevent="start">
-      <label class="field">Tipo de publicação<select v-model="section" class="form-select"><option value="noticias">Notícia</option><option value="temas">Tema</option></select></label>
+      <label v-if="auth.isMaster" class="field">Tipo de publicação<select v-model="section" class="form-select"><option value="noticias">Notícia</option><option value="temas">Tema</option></select></label>
+      <p v-else>Escolha um modelo para sua notícia e envie a matéria para revisão quando estiver pronta.</p>
       <label class="field">Modelo<select v-model.number="model" class="form-select"><option :value="1">Notícia simples · duas imagens</option><option :value="2">Notícia ilustrada · três imagens</option><option :value="3">Reportagem com galeria</option></select></label>
       <button class="btn button-dark" type="submit">Abrir editor <i class="bi bi-arrow-right"></i></button>
     </form>
@@ -113,8 +121,8 @@ function viewPublic() {
       <div class="toolbar-actions">
         <button class="btn button-light" @click="preview = !preview"><i class="bi bi-eye"></i> {{ preview ? 'Voltar à edição' : 'Visualizar' }}</button>
         <button class="btn button-light" @click="ask('draft')">{{ entry.status === 'published' ? 'Retirar do ar' : 'Salvar rascunho' }}</button>
-        <button class="btn button-light" @click="ask('pending')">Enviar para validação</button>
-        <button class="btn button-dark" @click="ask('published')">{{ entry.status === 'pending' ? 'Aprovar e publicar' : entry.status === 'published' ? 'Atualizar publicação' : 'Publicar' }}</button>
+        <button :class="['btn', auth.isMaster ? 'button-light' : 'button-dark']" @click="ask('pending')">Enviar para revisão</button>
+        <button v-if="auth.isMaster" class="btn button-dark" @click="ask('published')">{{ entry.status === 'pending' ? 'Aprovar e publicar' : entry.status === 'published' ? 'Atualizar publicação' : 'Publicar' }}</button>
         <button v-if="entry.status === 'published'" class="btn button-light" @click="viewPublic">Abrir no portal</button>
       </div>
     </header>
@@ -137,7 +145,7 @@ function viewPublic() {
         </article>
         <div class="add-block"><label class="field mb-0">Tipo de bloco<select v-model="blockType" class="form-select"><option v-for="(label, type) in blockTypes" :key="type" :value="type">{{ label }}</option></select></label><button class="btn button-dark" @click="add"><i class="bi bi-plus-lg"></i> Adicionar bloco</button></div>
       </section>
-      <aside class="admin-panel editor-settings" aria-label="Configurações">
+      <aside ref="settings" class="admin-panel editor-settings" aria-label="Configurações" tabindex="-1">
         <div v-if="editing" class="settings-tabs"><button class="btn button-light" :aria-pressed="panel === 'entry'" @click="panel = 'entry'">Publicação</button><button class="btn button-light" :aria-pressed="panel === 'block'" @click="panel = 'block'">Bloco</button></div>
         <template v-if="!editing || panel === 'entry'">
           <h2>Dados do registro</h2>

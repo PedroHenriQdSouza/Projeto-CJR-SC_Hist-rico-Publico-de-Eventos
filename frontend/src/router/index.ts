@@ -9,6 +9,7 @@ import Missing from '../views/Missing.vue'
 import Dashboard from '../views/Dashboard.vue'
 import AdminList from '../views/AdminList.vue'
 import Editor from '../views/Editor.vue'
+import AdminUsers from '../views/AdminUsers.vue'
 
 const sections = ['edicoes', 'temas', 'categorias', 'noticias', 'editais']
 export const router = createRouter({
@@ -28,6 +29,7 @@ export const router = createRouter({
     ] },
     { path: '/admin', component: AdminLayout, children: [
       { path: '', component: Dashboard },
+      { path: 'usuarios', component: AdminUsers },
       { path: 'nova-publicacao', component: Editor, props: { section: 'noticias', choose: true } },
       { path: ':section', component: AdminList, props: true },
       { path: ':section/:id', component: Editor, props: true },

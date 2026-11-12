@@ -9,7 +9,7 @@ const example = computed(() => catalog.published('editais').find(item => item.id
 </script>
 
 <template>
-  <header class="page-heading"><div class="site-container"><RouterLink to="/">Home</RouterLink><h1>Faça Parte</h1><p>Orientações para escolas, estudantes e organizações interessadas no CJR.</p></div></header>
+  <header class="page-heading participation-heading"><div class="site-container"><RouterLink to="/">Home</RouterLink><h1>Faça Parte</h1><p>Orientações para escolas, estudantes e organizações interessadas no CJR.</p></div></header>
   <section class="site-container section-space prose">
     <h2>Escolas e estudantes</h2><p>Acompanhe os editais de cada edição para consultar critérios, calendário e orientações de inscrição. Consulte sua escola para saber como organizar uma equipe.</p>
     <RouterLink class="btn button-dark mb-5" to="/editais">Consultar editais <i class="bi bi-arrow-right"></i></RouterLink>

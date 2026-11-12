@@ -11,7 +11,8 @@ const icons: Record<number, string> = { 2017: 'cpu', 2018: 'trophy', 2022: 'ligh
 const events = computed(() => [
   ...editions.value.map(item => ({ item, edition: item })),
   ...catalog.published('marcos_historicos').map(item => ({ item, edition: editions.value.find(edition => edition.id === item.editionId) })),
-].sort((a, b) => (a.item.year ?? 9999) - (b.item.year ?? 9999)).map(event => ({
+].filter(({ item }) => item.year !== null && item.year <= 2026)
+  .sort((a, b) => (a.item.year ?? 0) - (b.item.year ?? 0)).map(event => ({
   ...event, media: cover(event.item), theme: event.edition?.id === event.item.id ? themes.value.find(theme => theme.id === event.edition?.themeId) : undefined,
 })))
 

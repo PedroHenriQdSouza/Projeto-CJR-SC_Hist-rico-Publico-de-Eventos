@@ -34,18 +34,18 @@ Entre os aspectos listados no briefing (acervo, vencedores, critérios editoriai
 
 | Ator | Necessidade | Como o sistema atende |
 |---|---|---|
-| **Comunidade** (famílias, estudantes, imprensa) | Consultar a história, os temas e as categorias | Portal público, linha do tempo e páginas ligadas |
+| **Comunidade** (famílias, estudantes, imprensa) | Consultar a história, os temas e as categorias | Portal público, marcos históricos, jornada do estudante e páginas ligadas |
 | **Escolas e professores** | Entender categorias e editais para participar | Categorias, Editais e "Faça parte" |
-| **Curador / editor** (Secretaria de Educação) | Registrar edições, notícias e resultados | Painel `/admin` e editor em blocos |
-| **Validador** (coordenação do CJR) | Garantir que só sai conteúdo correto e autorizado | Status "Pendente de validação" e confirmação de publicação |
+| **Colaborador** (perfil do painel) | Escrever notícias sobre o campeonato | "Minhas matérias", editor em blocos, rascunho e envio para revisão |
+| **Administrador master** (coordenação do CJR na Secretaria de Educação) | Garantir que só sai conteúdo correto e autorizado; manter edições, temas e categorias | Publicações pendentes, "Aprovar e publicar", edição de todas as coleções e cadastro de usuários |
 | **Gestão operacional** (Desafio 01) | Fonte das edições (datas, local, inscrições) | Integração futura; ver [03](03-interoperabilidade.md) |
 | **Domínio competitivo** (Desafio 02) | Fonte dos resultados e classificações | Integração futura; ver [03](03-interoperabilidade.md) |
 
 ## Escopo do MVP
 
 **Dentro**
-- Portal público com home, linha do tempo, edições, temas, categorias, notícias, editais e "Faça parte"
-- Painel de curadoria com CRUD de 7 coleções
+- Portal público com home, jornada do estudante, marcos históricos, edições, temas, categorias, notícias, editais, parceiros e "Faça parte"
+- Painel de curadoria com CRUD de 7 coleções e dois perfis (Colaborador e Administrador master)
 - Fluxo editorial Rascunho → Pendente → Publicado, com histórico
 - Fonte e créditos obrigatórios na interface de cada registro
 - Acervo real das 6 edições (a partir dos slides) e exemplos fictícios identificados
@@ -59,15 +59,15 @@ Entre os aspectos listados no briefing (acervo, vencedores, critérios editoriai
 
 ```mermaid
 flowchart LR
-    A[Curador cadastra ou edita<br/>edição, tema, notícia] --> B[Informa fontes<br/>e créditos]
+    A[Colaborador escreve<br/>uma notícia] --> B[Informa fontes<br/>e créditos]
     B --> C{Salvar como}
     C -->|Rascunho| D[Rascunho<br/>visível só no painel]
-    C -->|Enviar para validação| E[Pendente de validação<br/>aparece no dashboard]
+    C -->|Enviar para revisão| E[Pendente de validação<br/>aparece para o master]
     D --> E
-    E -->|Validador aprova| F[Publicado<br/>visível no portal]
+    E -->|Master aprova| F[Publicado<br/>visível no portal]
     F -->|Correção| G[Atualizar publicação<br/>registro no histórico]
     F -->|Problema encontrado| H[Retirar do ar<br/>volta a rascunho]
-    F --> I[Comunidade consulta<br/>linha do tempo e páginas]
+    F --> I[Comunidade consulta<br/>notícias, edições e páginas]
 ```
 
 ## Indicadores de sucesso (propostos)
