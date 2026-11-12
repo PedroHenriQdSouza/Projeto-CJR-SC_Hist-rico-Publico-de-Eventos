@@ -1,4 +1,4 @@
-# CJR · Histórico Público do Campeonato Joinvilense de Robótica
+# CJRSC · Histórico Público do Campeonato Joinvilense de Robótica
 
 > Portal público e painel de curadoria para **preservar, organizar e divulgar** a história do Campeonato Joinvilense de Robótica (CJR).
 > Proposta da equipe para o **Desafio 03 — Histórico Público do Evento** do Hackathon UniSENAI · ADS · Novembro/2026.
@@ -52,6 +52,15 @@ npm run dev:api
 **Painel administrativo:** acesse `http://127.0.0.1:5173/admin` e clique em **Entrar no painel**. O acesso é simulado e não pede senha (veja [Limitações](#limitações-conhecidas)).
 
 **Recomeçar do zero:** os dados ficam no `localStorage` do navegador. Para restaurar o acervo inicial, apague as chaves `cjr_*` em DevTools → Application → Local Storage, ou abra o portal numa janela anônima.
+
+## Roteiro de demonstração (2 minutos)
+
+1. **Home**: apresentação do campeonato → atalhos → "Nossa história" com a fonte → **linha do tempo** de 2017 a 2026.
+2. Clique em **6ª edição** e veja o cartaz, os números (69 equipes, 35 escolas, 312 estudantes), o local, o tema e as fontes.
+3. Abra **Temas** e **Categorias** e repare que tudo se liga (tema → edições; categoria → edições).
+4. Entre em **Área administrativa** → **Edições** → abra uma edição e preencha "Projetos e resultados validados".
+5. Clique em **Enviar para validação**. O status muda para *Pendente de validação* e o conteúdo **não aparece** no portal.
+6. Clique em **Aprovar e publicar** e confirme. O conteúdo aparece no portal com a fonte, e o **histórico de alterações** registra cada etapa.
 
 ## Funcionalidades
 
@@ -141,11 +150,11 @@ Os itens acima estão priorizados no [backlog](docs/05-backlog.md).
 
 | Integrante | Papel |
 |---|---|
-| _Emilly da Silva da Luz_ | _desenvolvimento frontend e backend_ |
-| _Pedro Henrique de Souza_ | _documentação_ |
-| _Dalton Marcelino_ | _UX e pitch_ |
-| _Alexandre Fragoso_ | _UX e pitch_ |
-| _Kauã Salvalagio_ | _UX e pitch_ |
+| Emilly da Silva da Luz | desenvolvimento frontend e backend |
+| Pedro Henrique de Souza | documentação |
+| Dalton Marcelino | UX e pitch |
+| Alexandre Fragoso | UX e pitch |
+| Kauã Salvalagio | UX e pitch |
 
 ## Licença e autoria
 
