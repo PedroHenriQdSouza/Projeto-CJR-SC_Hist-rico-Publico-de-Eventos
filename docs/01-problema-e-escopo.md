@@ -50,11 +50,10 @@ Entre os aspectos listados no briefing (acervo, vencedores, critérios editoriai
 - Fonte e créditos obrigatórios na interface de cada registro
 - Acervo real das 6 edições (a partir dos slides) e exemplos fictícios identificados
 
-**Fora (consciente)**
-- Inscrições, agenda e logística do evento → **Desafio 01**
-- Pontuação, súmulas e classificação → **Desafio 02**
-- Autenticação real e banco de dados compartilhado → backlog
-- Integração funcional entre equipes (não exigida durante o evento)
+**Conectado ao ecossistema do campeonato**
+- Edições, agenda e totais de participação têm como fonte oficial a **gestão operacional**
+- Resultados e classificações têm como fonte oficial o **domínio competitivo**
+- O Histórico Público recebe esses dados, valida e publica com a fonte; a integração automática está prevista no [backlog](05-backlog.md)
 
 ## Fluxo principal
 
